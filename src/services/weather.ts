@@ -5,9 +5,6 @@ import type {
   DailyForecast,
 } from "@/types/weather";
 
-const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
-const BASE_URL = "https://api.openweathermap.org";
-
 export class WeatherApiError extends Error {
   constructor(
     message: string,
@@ -21,9 +18,7 @@ export class WeatherApiError extends Error {
 export const searchCities = async (query: string): Promise<City[]> => {
   if (!query || query.length < 2) return [];
 
-  const response = await fetch(
-    `${BASE_URL}/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`
-  );
+  const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
 
   if (!response.ok) {
     throw new WeatherApiError("도시 검색에 실패했습니다", response.status);
@@ -36,9 +31,7 @@ export const getCurrentWeather = async (
   lat: number,
   lon: number
 ): Promise<CurrentWeather> => {
-  const response = await fetch(
-    `${BASE_URL}/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=kr&appid=${API_KEY}`
-  );
+  const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
 
   if (!response.ok) {
     throw new WeatherApiError(
@@ -54,9 +47,7 @@ export const getForecast = async (
   lat: number,
   lon: number
 ): Promise<ForecastResponse> => {
-  const response = await fetch(
-    `${BASE_URL}/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=kr&appid=${API_KEY}`
-  );
+  const response = await fetch(`/api/forecast?lat=${lat}&lon=${lon}`);
 
   if (!response.ok) {
     throw new WeatherApiError(
