@@ -8,11 +8,11 @@ import {
   useTemperatureUnit,
   formatTemperature,
 } from "@/hooks/useTemperatureUnit";
-import type { HourlyForecast as HourlyForecastType } from "@/types/weather";
+import type { ForecastItem } from "@/types/weather";
 import { Clock } from "lucide-react";
 
 type HourlyForecastProps = {
-  data: HourlyForecastType[] | undefined;
+  data: ForecastItem[] | undefined;
   isLoading: boolean;
 };
 
@@ -27,19 +27,15 @@ export const HourlyForecast = ({ data, isLoading }: HourlyForecastProps) => {
     return null;
   }
 
-  const hourlyData = data.slice(0, 24);
-
   const formatHour = (timestamp: number) => {
     const date = new Date(timestamp * 1000);
     const now = new Date();
-    const isToday = date.toDateString() === now.toDateString();
-    const hour = date.getHours();
 
-    if (isToday && Math.abs(date.getTime() - now.getTime()) < 3600000) {
+    if (Math.abs(date.getTime() - now.getTime()) < 3600000) {
       return "지금";
     }
 
-    return `${hour}시`;
+    return `${date.getHours()}시`;
   };
 
   return (
@@ -51,27 +47,27 @@ export const HourlyForecast = ({ data, isLoading }: HourlyForecastProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-          {hourlyData.map((hour, index) => (
+        <div className="flex gap-4 overflow-x-auto pb-2">
+          {data.map((item) => (
             <div
-              key={hour.dt}
+              key={item.dt}
               className="flex flex-col items-center gap-2 min-w-[72px] p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
             >
               <span className="text-sm font-medium text-muted-foreground">
-                {formatHour(hour.dt)}
+                {formatHour(item.dt)}
               </span>
               <Image
-                src={getWeatherIconUrl(hour.weather[0].icon, "2x")}
-                alt={hour.weather[0].description}
+                src={getWeatherIconUrl(item.weather[0].icon, "2x")}
+                alt={item.weather[0].description}
                 width={48}
                 height={48}
               />
               <span className="text-base font-semibold">
-                {formatTemperature(hour.temp, unit)}
+                {formatTemperature(item.main.temp, unit)}
               </span>
-              {hour.pop > 0 && (
+              {item.pop > 0 && (
                 <span className="text-xs text-blue-500">
-                  {Math.round(hour.pop * 100)}%
+                  {Math.round(item.pop * 100)}%
                 </span>
               )}
             </div>

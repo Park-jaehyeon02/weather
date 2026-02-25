@@ -5,17 +5,21 @@ import {
   Wind,
   Eye,
   Gauge,
-  Sun,
   Sunrise,
   Sunset,
   CloudRain,
+  Thermometer,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { ForecastResponse } from "@/types/weather";
+import type { CurrentWeather } from "@/types/weather";
+import {
+  useTemperatureUnit,
+  formatTemperature,
+} from "@/hooks/useTemperatureUnit";
 
 type WeatherDetailsProps = {
-  data: ForecastResponse | undefined;
+  data: CurrentWeather | undefined;
   isLoading: boolean;
 };
 
@@ -60,6 +64,8 @@ const DetailCardSkeleton = () => {
 };
 
 export const WeatherDetails = ({ data, isLoading }: WeatherDetailsProps) => {
+  const { unit } = useTemperatureUnit();
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -74,8 +80,6 @@ export const WeatherDetails = ({ data, isLoading }: WeatherDetailsProps) => {
     return null;
   }
 
-  const { current } = data;
-
   const formatTime = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleTimeString("ko-KR", {
       hour: "2-digit",
@@ -83,24 +87,28 @@ export const WeatherDetails = ({ data, isLoading }: WeatherDetailsProps) => {
     });
   };
 
-  const getUvDescription = (uvi: number) => {
-    if (uvi <= 2) return "낮음";
-    if (uvi <= 5) return "보통";
-    if (uvi <= 7) return "높음";
-    if (uvi <= 10) return "매우 높음";
-    return "위험";
-  };
-
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       <DetailCard
+        icon={<Thermometer className="h-4 w-4" />}
+        title="체감 온도"
+        value={formatTemperature(data.main.feels_like, unit)}
+        description={
+          data.main.feels_like < data.main.temp
+            ? "실제보다 춥게 느껴짐"
+            : data.main.feels_like > data.main.temp
+              ? "실제보다 덥게 느껴짐"
+              : "실제 온도와 비슷"
+        }
+      />
+      <DetailCard
         icon={<Droplets className="h-4 w-4" />}
         title="습도"
-        value={`${current.humidity}%`}
+        value={`${data.main.humidity}%`}
         description={
-          current.humidity > 70
+          data.main.humidity > 70
             ? "습함"
-            : current.humidity < 30
+            : data.main.humidity < 30
               ? "건조함"
               : "적정"
         }
@@ -108,37 +116,29 @@ export const WeatherDetails = ({ data, isLoading }: WeatherDetailsProps) => {
       <DetailCard
         icon={<Wind className="h-4 w-4" />}
         title="풍속"
-        value={`${current.wind_speed} m/s`}
-        description={`${current.wind_deg}° 방향`}
-      />
-      <DetailCard
-        icon={<Sun className="h-4 w-4" />}
-        title="자외선 지수"
-        value={current.uvi.toFixed(1)}
-        description={getUvDescription(current.uvi)}
+        value={`${data.wind.speed} m/s`}
+        description={`${data.wind.deg}° 방향`}
       />
       <DetailCard
         icon={<Eye className="h-4 w-4" />}
         title="가시거리"
-        value={`${(current.visibility / 1000).toFixed(1)} km`}
-        description={current.visibility >= 10000 ? "맑음" : "흐림"}
+        value={`${(data.visibility / 1000).toFixed(1)} km`}
+        description={data.visibility >= 10000 ? "맑음" : "흐림"}
       />
       <DetailCard
         icon={<Gauge className="h-4 w-4" />}
         title="기압"
-        value={`${current.pressure} hPa`}
-        description={
-          current.pressure > 1013 ? "고기압" : "저기압"
-        }
+        value={`${data.main.pressure} hPa`}
+        description={data.main.pressure > 1013 ? "고기압" : "저기압"}
       />
       <DetailCard
         icon={<CloudRain className="h-4 w-4" />}
         title="구름"
-        value={`${current.clouds}%`}
+        value={`${data.clouds.all}%`}
         description={
-          current.clouds > 80
+          data.clouds.all > 80
             ? "흐림"
-            : current.clouds > 40
+            : data.clouds.all > 40
               ? "구름 많음"
               : "맑음"
         }
@@ -146,12 +146,12 @@ export const WeatherDetails = ({ data, isLoading }: WeatherDetailsProps) => {
       <DetailCard
         icon={<Sunrise className="h-4 w-4" />}
         title="일출"
-        value={formatTime(current.sunrise)}
+        value={formatTime(data.sys.sunrise)}
       />
       <DetailCard
         icon={<Sunset className="h-4 w-4" />}
         title="일몰"
-        value={formatTime(current.sunset)}
+        value={formatTime(data.sys.sunset)}
       />
     </div>
   );

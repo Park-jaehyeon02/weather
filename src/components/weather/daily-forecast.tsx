@@ -27,8 +27,6 @@ export const DailyForecast = ({ data, isLoading }: DailyForecastProps) => {
     return null;
   }
 
-  const dailyData = data.slice(0, 7);
-
   const formatDay = (timestamp: number, index: number) => {
     if (index === 0) return "오늘";
     if (index === 1) return "내일";
@@ -38,9 +36,9 @@ export const DailyForecast = ({ data, isLoading }: DailyForecastProps) => {
     return `${date.getMonth() + 1}/${date.getDate()} (${days[date.getDay()]})`;
   };
 
-  const maxTemp = Math.max(...dailyData.map((d) => d.temp.max));
-  const minTemp = Math.min(...dailyData.map((d) => d.temp.min));
-  const tempRange = maxTemp - minTemp;
+  const maxTemp = Math.max(...data.map((d) => d.temp_max));
+  const minTemp = Math.min(...data.map((d) => d.temp_min));
+  const tempRange = maxTemp - minTemp || 1;
 
   const getBarPosition = (min: number, max: number) => {
     const left = ((min - minTemp) / tempRange) * 100;
@@ -53,12 +51,12 @@ export const DailyForecast = ({ data, isLoading }: DailyForecastProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Calendar className="h-5 w-5" />
-          7일 예보
+          일별 예보
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        {dailyData.map((day, index) => {
-          const barStyle = getBarPosition(day.temp.min, day.temp.max);
+        {data.map((day, index) => {
+          const barStyle = getBarPosition(day.temp_min, day.temp_max);
 
           return (
             <div
@@ -78,16 +76,19 @@ export const DailyForecast = ({ data, isLoading }: DailyForecastProps) => {
                 />
               </div>
 
-              {day.pop > 0 && (
+              {day.pop > 0 ? (
                 <div className="flex items-center gap-1 w-12 text-blue-500">
                   <Droplets className="h-3 w-3" />
-                  <span className="text-xs">{Math.round(day.pop * 100)}%</span>
+                  <span className="text-xs">
+                    {Math.round(day.pop * 100)}%
+                  </span>
                 </div>
+              ) : (
+                <div className="w-12" />
               )}
-              {day.pop === 0 && <div className="w-12" />}
 
               <span className="w-12 text-sm text-muted-foreground text-right">
-                {formatTemperature(day.temp.min, unit)}
+                {formatTemperature(day.temp_min, unit)}
               </span>
 
               <div className="flex-1 h-2 bg-muted rounded-full relative min-w-[100px]">
@@ -98,7 +99,7 @@ export const DailyForecast = ({ data, isLoading }: DailyForecastProps) => {
               </div>
 
               <span className="w-12 text-sm font-medium">
-                {formatTemperature(day.temp.max, unit)}
+                {formatTemperature(day.temp_max, unit)}
               </span>
             </div>
           );
@@ -115,7 +116,7 @@ const DailyForecastSkeleton = () => {
         <Skeleton className="h-6 w-24" />
       </CardHeader>
       <CardContent className="space-y-2">
-        {[...Array(7)].map((_, i) => (
+        {[...Array(5)].map((_, i) => (
           <div key={i} className="flex items-center gap-4 p-3">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-10 w-10 rounded-full" />

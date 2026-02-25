@@ -49,71 +49,57 @@ export type CurrentWeather = {
   name: string;
 };
 
-export type HourlyForecast = {
+export type ForecastItem = {
   dt: number;
-  temp: number;
-  feels_like: number;
-  pressure: number;
-  humidity: number;
-  uvi: number;
-  clouds: number;
+  main: {
+    temp: number;
+    feels_like: number;
+    temp_min: number;
+    temp_max: number;
+    pressure: number;
+    humidity: number;
+  };
+  weather: WeatherCondition[];
+  clouds: {
+    all: number;
+  };
+  wind: {
+    speed: number;
+    deg: number;
+    gust?: number;
+  };
   visibility: number;
-  wind_speed: number;
-  wind_deg: number;
-  weather: WeatherCondition[];
   pop: number;
-};
-
-export type DailyForecast = {
-  dt: number;
-  sunrise: number;
-  sunset: number;
-  temp: {
-    day: number;
-    min: number;
-    max: number;
-    night: number;
-    eve: number;
-    morn: number;
-  };
-  feels_like: {
-    day: number;
-    night: number;
-    eve: number;
-    morn: number;
-  };
-  pressure: number;
-  humidity: number;
-  wind_speed: number;
-  wind_deg: number;
-  weather: WeatherCondition[];
-  clouds: number;
-  pop: number;
-  uvi: number;
+  dt_txt: string;
 };
 
 export type ForecastResponse = {
-  lat: number;
-  lon: number;
-  timezone: string;
-  timezone_offset: number;
-  current: {
-    dt: number;
+  cod: string;
+  message: number;
+  cnt: number;
+  list: ForecastItem[];
+  city: {
+    id: number;
+    name: string;
+    coord: { lat: number; lon: number };
+    country: string;
+    population: number;
+    timezone: number;
     sunrise: number;
     sunset: number;
-    temp: number;
-    feels_like: number;
-    pressure: number;
-    humidity: number;
-    uvi: number;
-    clouds: number;
-    visibility: number;
-    wind_speed: number;
-    wind_deg: number;
-    weather: WeatherCondition[];
   };
-  hourly: HourlyForecast[];
-  daily: DailyForecast[];
+};
+
+export type HourlyForecast = ForecastItem;
+
+export type DailyForecast = {
+  dt: number;
+  temp_min: number;
+  temp_max: number;
+  weather: WeatherCondition[];
+  pop: number;
+  humidity: number;
+  wind_speed: number;
 };
 
 export type TemperatureUnit = "celsius" | "fahrenheit";

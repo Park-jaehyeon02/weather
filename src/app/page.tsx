@@ -15,6 +15,10 @@ import {
 } from "@/components/weather/error-message";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useCurrentWeather, useForecast } from "@/hooks/useWeather";
+import {
+  getHourlyFromForecast,
+  getDailyFromForecast,
+} from "@/services/weather";
 
 type SelectedCity = {
   name: string;
@@ -93,6 +97,9 @@ export default function Home() {
   const cityName = selectedCity?.name || currentWeather?.name || "";
   const cityCountry = currentWeather?.sys?.country || "";
 
+  const hourlyData = forecast ? getHourlyFromForecast(forecast) : undefined;
+  const dailyData = forecast ? getDailyFromForecast(forecast) : undefined;
+
   return (
     <div className="min-h-screen bg-background">
       <Header onCitySelect={handleCitySelect} />
@@ -164,15 +171,15 @@ export default function Home() {
               </motion.div>
 
               <motion.div variants={itemVariants}>
-                <HourlyForecast data={forecast?.hourly} isLoading={isLoading} />
+                <HourlyForecast data={hourlyData} isLoading={isLoading} />
               </motion.div>
 
               <motion.div variants={itemVariants}>
-                <DailyForecast data={forecast?.daily} isLoading={isLoading} />
+                <DailyForecast data={dailyData} isLoading={isLoading} />
               </motion.div>
 
               <motion.div variants={itemVariants}>
-                <WeatherDetails data={forecast} isLoading={isLoading} />
+                <WeatherDetails data={currentWeather} isLoading={isLoading} />
               </motion.div>
             </>
           )}
